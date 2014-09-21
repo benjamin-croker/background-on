@@ -18,10 +18,11 @@
   (println "API call: " uri params)
   ;; Sleep for 1/5th of a second to avoid NYT API rate limits
   (Thread/sleep 200)
-  (->>
-    (client/get uri {:query-params params})
-    (:body)
-    (json/read-json)))
+  (let [response (->> (client/get uri {:query-params params :throw-exceptions false})
+                      (:body)
+                      (json/read-json))]
+    ;; only return the response for successful queries
+    (if (= (:status response) "OK") response nil)))
 
 (defn get-most-viewed-articles
   "gets the most viewed articles from the NYT home page"
@@ -68,11 +69,14 @@
   []
   (let [most-viewed (->> (get-most-viewed-articles)
                          (urls-most-viewed)
-                         (map get-newswire-info))
-        related (->> (doall most-viewed)
+                         (map get-newswire-info)
+                         (doall))
+        related (->> most-viewed
                      (map #(->> %
                                 (related-urls)
-                                (map get-newswire-info))))]
+                                (map get-newswire-info)
+                                (doall)))
+                     (doall))]
     (map #(merge (trim-newswire-article %1)
                  {:related (map trim-newswire-article %2)})
           most-viewed related)))
