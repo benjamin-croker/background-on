@@ -1,16 +1,16 @@
 (ns background-on.nyt
   (:require
     [clojure.data.json :as json]
-    [clj-http.client :as client])
+    [clj-http.client :as client]
+    [cheshire.core :refer [generate-string]])
   (:gen-class))
 
-(defn- load-keys
-    "loads the keys for accessing the api"
-    [keys-filename]
-    (json/read-json (slurp (clojure.java.io/resource keys-filename))))
+;; magic strings
+(def KEYS_FILENAME "keys.json")
+(def SNAPSHOT_FILENAME "snapshot.json")
 
 (def ^{:private true} api-keys
-  (load-keys "keys.json"))
+  (json/read-json (slurp (clojure.java.io/resource KEYS_FILENAME))))
 
 (defn api-call
   "makes an HTTP get request to a remote API"
@@ -80,3 +80,12 @@
     (map #(merge (trim-newswire-article %1)
                  {:related (map trim-newswire-article %2)})
           most-viewed related)))
+
+(defn write-daily-snapshot
+  "writes the daily NYT article data to disc"
+  [daily-snapshot]
+  (spit (clojure.java.io/resource SNAPSHOT_FILENAME)
+        (generate-string daily-snapshot {:pretty true})))
+
+(defn -main []
+  (write-daily-snapshot (build-daily-snapshot)))

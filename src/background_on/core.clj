@@ -15,6 +15,7 @@
   (resp/file-response "index.html" {:root "resouces"}))
 
 (defroutes app-routes
+  (GET "/snapshot.json" [] (resp/file-response "snapshot.json" {:root "resources"}))
   (GET "/" [] (resp/file-response "index.html" {:root "resources"}))
   (route/files "/" {:root "resources"})
   (route/not-found "not found"))
