@@ -1,8 +1,7 @@
 (ns background-on.nyt
   (:require
-    [clojure.data.json :as json]
     [clj-http.client :as client]
-    [cheshire.core :refer [generate-string]])
+    [cheshire.core :refer [generate-string parse-string]])
   (:gen-class))
 
 ;; magic strings
@@ -10,7 +9,23 @@
 (def SNAPSHOT_FILENAME "snapshot.json")
 
 (def ^{:private true} api-keys
-  (json/read-json (slurp (clojure.java.io/resource KEYS_FILENAME))))
+  (parse-string (slurp (clojure.java.io/resource KEYS_FILENAME)) true))
+
+(defn html-unescape
+  "Xml decodes the given string."
+  [s]
+  (let [unesc (fn [escape-str] (->> escape-str
+                                    (re-matches #"\&\#(\d+);")
+                                    (second)
+                                    (Integer/parseInt)
+                                    (char)
+                                    (String/valueOf)))]
+    (clojure.string/replace s "&amp;" "&")
+    (clojure.string/replace s "&gt;" ">")
+    (clojure.string/replace s "&lt;" "<")
+    (clojure.string/replace s "&quot;" "\"")
+    (clojure.string/replace s "&apos;" "'")
+    (clojure.string/replace s #"\&\#?[a-zA-Z0-9]+;" #(unesc %1))))
 
 (defn api-call
   "makes an HTTP get request to a remote API"
@@ -18,9 +33,9 @@
   (println "API call: " uri params)
   ;; Sleep for 1/5th of a second to avoid NYT API rate limits
   (Thread/sleep 200)
-  (let [response (->> (client/get uri {:query-params params :throw-exceptions false})
-                      (:body)
-                      (json/read-json))]
+  (let [response (-> (client/get uri {:query-params params :throw-exceptions false})
+                     (:body)
+                     (parse-string true))]
     ;; only return the response for successful queries
     (if (= (:status response) "OK") response nil)))
 
@@ -84,8 +99,10 @@
 (defn write-daily-snapshot
   "writes the daily NYT article data to disc"
   [daily-snapshot]
-  (spit (clojure.java.io/resource SNAPSHOT_FILENAME)
-        (generate-string daily-snapshot {:pretty true})))
+  ;; assume that the data returned by the NYT is safe to be unescaped.
+  (->> (generate-string daily-snapshot {:pretty true})
+       (html-unescape)
+       (spit (clojure.java.io/resource SNAPSHOT_FILENAME))))
 
 (defn -main []
   (write-daily-snapshot (build-daily-snapshot)))
