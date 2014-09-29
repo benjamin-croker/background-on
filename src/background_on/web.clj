@@ -1,4 +1,4 @@
-(ns background-on.core
+(ns background-on.web
   (:require [compojure.core :refer [defroutes GET]]
             [ring.adapter.jetty :as ring]
             [ring.util.response :as resp]
@@ -20,10 +20,16 @@
   (route/files "/" {:root "resources"})
   (route/not-found "not found"))
 
+(defn init []
+  )
+
+(defn destroy []
+  )
+
 (def app
   (handler/site app-routes))
 
 (defn -main
-  ([] (-main 8080))
+  ([] (-main 80))
   ([port]
       (ring/run-jetty app {:port (Integer. port) :join? false})))
