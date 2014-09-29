@@ -1,0 +1,1 @@
+web: java -jar target/background-on.jar $PORT
