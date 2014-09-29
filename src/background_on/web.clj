@@ -3,7 +3,8 @@
             [ring.adapter.jetty :as ring]
             [ring.util.response :as resp]
             [compojure.handler :as handler]
-            [compojure.route :as route])
+            [compojure.route :as route]
+            [background-on.nyt :as nyt])
   (:gen-class))
 
 ;; point selmer to the HTML templates
@@ -21,7 +22,7 @@
   (route/not-found "not found"))
 
 (defn init []
-  )
+  (nyt/write-daily-snapshot (nyt/build-daily-snapshot)))
 
 (defn destroy []
   )

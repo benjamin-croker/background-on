@@ -9,7 +9,10 @@
 (def SNAPSHOT_FILENAME "snapshot.json")
 
 (def ^{:private true} api-keys
-  (parse-string (slurp (clojure.java.io/resource KEYS_FILENAME)) true))
+  {
+    :most-popular-key (System/getenv "MOST_POPULAR")
+    :times-newswire-key (System/getenv "TIMES_NEWSWIRE")
+  })
 
 (defn html-unescape
   "Xml decodes the given string."
@@ -44,7 +47,7 @@
   []
   (api-call
     "http://api.nytimes.com/svc/mostpopular/v2/mostviewed/all-sections/1.json"
-    {:api-key (:most_popular_key api-keys)}))
+    {:api-key (:most-popular-key api-keys)}))
 
 (defn urls-most-viewed
   "returns the URLs of the NYT articles from a Most Popular API response"
@@ -58,7 +61,7 @@
   [article-url]
     (api-call
       "http://api.nytimes.com/svc/news/v3/content.json"
-      {:url article-url :api-key (:times_newswire_key api-keys)}))
+      {:url article-url :api-key (:times-newswire-key api-keys)}))
 
 (defn related-urls
   "returns the list of related URLs from a Newswire API response"
