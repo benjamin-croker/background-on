@@ -7,22 +7,17 @@
             [background-on.nyt :as nyt])
   (:gen-class))
 
-;; point selmer to the HTML templates
-; (selmer/set-resource-path! "resouces")
-
-(defn index-page
-  "renders and returns the index page"
-  []
-  (resp/file-response "index.html" {:root "resouces"}))
+(def snapshot-json-atom (atom nil))
 
 (defroutes app-routes
-  (GET "/snapshot.json" [] (resp/file-response "snapshot.json" {:root "resources"}))
+  (GET "/snapshot.json" [] @snapshot-json-atom)
   (GET "/" [] (resp/file-response "index.html" {:root "resources"}))
   (route/files "/" {:root "resources"})
   (route/not-found "not found"))
 
 (defn init []
-  (nyt/write-daily-snapshot (nyt/build-daily-snapshot)))
+  (reset! snapshot-json-atom
+    (nyt/write-daily-snapshot (nyt/build-daily-snapshot))))
 
 (defn destroy []
   )

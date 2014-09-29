@@ -4,9 +4,6 @@
     [cheshire.core :refer [generate-string parse-string]])
   (:gen-class))
 
-;; magic strings
-(def KEYS_FILENAME "keys.json")
-(def SNAPSHOT_FILENAME "snapshot.json")
 
 (def ^{:private true} api-keys
   {
@@ -104,8 +101,7 @@
   [daily-snapshot]
   ;; assume that the data returned by the NYT is safe to be unescaped.
   (->> (generate-string daily-snapshot {:pretty true})
-       (html-unescape)
-       (spit (clojure.java.io/resource SNAPSHOT_FILENAME))))
+       (html-unescape)))
 
 (defn -main []
   (write-daily-snapshot (build-daily-snapshot)))
