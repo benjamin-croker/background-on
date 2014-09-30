@@ -7,7 +7,7 @@
             [background-on.nyt :as nyt])
   (:gen-class))
 
-(def snapshot-json-atom (atom nil))
+(def snapshot-json-atom (atom {}))
 
 (defroutes app-routes
   (GET "/snapshot" [] @snapshot-json-atom)
