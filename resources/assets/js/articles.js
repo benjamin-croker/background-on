@@ -88,6 +88,6 @@ var ArticleBox = React.createClass({
 });
 
 React.renderComponent(
-  <ArticleBox url="snapshot.json" />,
+  <ArticleBox url="snapshot" />,
   document.getElementById('content')
 );

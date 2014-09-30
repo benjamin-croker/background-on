@@ -10,7 +10,7 @@
 (def snapshot-json-atom (atom nil))
 
 (defroutes app-routes
-  (GET "/snapshot.json" [] @snapshot-json-atom)
+  (GET "/snapshot" [] @snapshot-json-atom)
   (GET "/" [] (resp/file-response "index.html" {:root "resources"}))
   (route/files "/" {:root "resources"})
   (route/not-found "not found"))
