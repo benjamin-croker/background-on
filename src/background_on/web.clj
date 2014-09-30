@@ -16,8 +16,7 @@
   (route/not-found "not found"))
 
 (defn init []
-  (reset! snapshot-json-atom
-    (nyt/write-daily-snapshot (nyt/build-daily-snapshot))))
+  )
 
 (defn destroy []
   )
@@ -28,4 +27,5 @@
 (defn -main
   ([] (-main 80))
   ([port]
-      (ring/run-jetty app {:port (Integer. port) :join? false})))
+    (reset! snapshot-json-atom (nyt/write-daily-snapshot (nyt/build-daily-snapshot)))
+    (ring/run-jetty app {:port (Integer. port) :join? false})))
